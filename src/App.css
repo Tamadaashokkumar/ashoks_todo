@@ -13,6 +13,7 @@ p {
 }
 .todoContainer {
   background-image: linear-gradient(#2a7b9b, #00eb62, #eddd53);
+  height: 100vh;
 }
 .heading {
   font-weight: bold;
