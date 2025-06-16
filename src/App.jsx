@@ -1,80 +1,110 @@
 import React, { Component } from "react";
-import "./app.css";
+import "./App.css";
 
-let paresedData = localStorage.getItem("todoList");
-let initialTodoList = JSON.parse(paresedData);
-let length = initialTodoList.length + 1;
+const getInitialTodos = () => {
+  const parsedData = localStorage.getItem("todoList");
+  try {
+    return parsedData ? JSON.parse(parsedData) : [];
+  } catch {
+    return [];
+  }
+};
+
 export default class App extends Component {
   state = {
-    todoList: initialTodoList,
+    todoList: getInitialTodos(),
     inputText: "",
-    editText: "",
+  };
+
+  generateNewId = () => {
+    const { todoList } = this.state;
+    return todoList.length > 0
+      ? Math.max(...todoList.map((todo) => todo.id)) + 1
+      : 1;
   };
 
   addInputText = (e) => {
     e.preventDefault();
     const { inputText } = this.state;
-    if (inputText === "") {
-      return alert("please enter todo");
+    if (!inputText.trim()) {
+      alert("Please enter a todo");
+      return;
     }
+
     const newTodo = {
-      id: length,
-      text: inputText,
+      id: this.generateNewId(),
+      text: inputText.trim(),
       isEdit: false,
       isChecked: false,
     };
-    this.setState((prevState) => ({
-      todoList: [...prevState.todoList, newTodo],
-    }));
-    length += 1;
+
+    this.setState(
+      (prevState) => ({
+        todoList: [...prevState.todoList, newTodo],
+        inputText: "",
+      }),
+      this.saveTodoItems
+    );
   };
 
   onDeleteHandler = (id) => {
-    const { todoList } = this.state;
-    const filterdData = todoList.filter((item) => item.id !== id);
-    this.setState({ todoList: filterdData });
+    this.setState(
+      (prevState) => ({
+        todoList: prevState.todoList.filter((item) => item.id !== id),
+      }),
+      this.saveTodoItems
+    );
   };
 
   updateEditStatus = (id) => {
-    this.setState((prev) => ({
-      todoList: prev.todoList.map((item) =>
-        item.id === id ? { ...item, isEdit: !item.isEdit } : item
-      ),
-    }));
+    this.setState(
+      (prevState) => ({
+        todoList: prevState.todoList.map((item) =>
+          item.id === id ? { ...item, isEdit: !item.isEdit } : item
+        ),
+      }),
+      this.saveTodoItems
+    );
   };
 
   updateCheckboxStatus = (id) => {
-    this.setState((prev) => ({
-      todoList: prev.todoList.map((item) =>
-        item.id === id ? { ...item, isChecked: !item.isChecked } : item
-      ),
-    }));
+    this.setState(
+      (prevState) => ({
+        todoList: prevState.todoList.map((item) =>
+          item.id === id ? { ...item, isChecked: !item.isChecked } : item
+        ),
+      }),
+      this.saveTodoItems
+    );
   };
 
-  editTextHandler = (id, description) => {
-    this.setState((prev) => ({
-      todoList: prev.todoList.map((item) =>
-        item.id === id ? { ...item, text: description } : item
-      ),
-    }));
+  editTextHandler = (id, newText) => {
+    this.setState(
+      (prevState) => ({
+        todoList: prevState.todoList.map((item) =>
+          item.id === id ? { ...item, text: newText } : item
+        ),
+      }),
+      this.saveTodoItems
+    );
   };
 
   saveTodoItems = () => {
     const { todoList } = this.state;
-    const data = JSON.stringify(todoList);
-    localStorage.setItem("todoList", data);
+    localStorage.setItem("todoList", JSON.stringify(todoList));
   };
 
   render() {
-    const { todoList, inputText, editText } = this.state;
+    const { todoList, inputText } = this.state;
 
     return (
-      <div className="todoContainer d-flex flex-column align-items-center  p-4">
+      <div className="todoContainer d-flex flex-column align-items-center p-4">
         <h1 className="mb-3 heading">Todo List</h1>
         <form className="d-flex" onSubmit={this.addInputText}>
           <input
             type="text"
             className="form-control mr-3"
+            placeholder="Enter new todo"
             onChange={(e) => this.setState({ inputText: e.target.value })}
             value={inputText}
           />
@@ -82,6 +112,7 @@ export default class App extends Component {
             Add
           </button>
         </form>
+
         <ul
           className="card w-50 mt-4 p-4"
           style={{
@@ -106,7 +137,7 @@ export default class App extends Component {
                 {item.isEdit ? (
                   <input
                     type="text"
-                    className="p-2"
+                    className="p-2 ml-2"
                     style={{ fontSize: "18px", border: "none" }}
                     value={item.text}
                     onChange={(e) =>
@@ -115,14 +146,16 @@ export default class App extends Component {
                   />
                 ) : (
                   <p
-                    className={item.isChecked ? "toogleChecklist" : null}
-                    style={{ fontSize: "23px" }}
+                    className={item.isChecked ? "toogleChecklist ml-2" : "ml-2"}
+                    style={{
+                      fontSize: "23px",
+                      textDecoration: item.isChecked ? "line-through" : "none",
+                    }}
                   >
                     {item.text}
                   </p>
                 )}
               </div>
-
               <div>
                 <button
                   className="btn btn-success mr-2"
@@ -134,15 +167,12 @@ export default class App extends Component {
                   className="btn btn-danger"
                   onClick={() => this.onDeleteHandler(item.id)}
                 >
-                  delete
+                  Delete
                 </button>
               </div>
             </li>
           ))}
         </ul>
-        <button className="btn btn-info" onClick={this.saveTodoItems}>
-          Save
-        </button>
       </div>
     );
   }
