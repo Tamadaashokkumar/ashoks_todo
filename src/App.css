@@ -1,0 +1,22 @@
+.checkbox {
+  width: 40px;
+  height: 30px;
+}
+p {
+  color: rgb(214, 123, 123);
+  margin-left: 6px;
+  font-weight: bold;
+}
+.toogleChecklist {
+  text-decoration: line-through;
+  color: aqua;
+}
+.todoContainer {
+  background-image: linear-gradient(#2a7b9b, #00eb62, #eddd53);
+}
+.heading {
+  font-weight: bold;
+  font-size: 48px;
+  color: yellow;
+  font-family: monospace;
+}
